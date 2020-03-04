@@ -87,22 +87,18 @@ Vis.workers = {
 
     calcPos: function() {
 
-        var A = Math.pow(2*Math.PI*Math.pow(Vis.sigma, 2), -2)/10000;     //Scaling
+        var x0vec = [Vis.xbar, Vis.ybar];
+        var x0sq = (Math.pow(Vis.xbar, 2) + Math.pow(Vis.ybar, 2));
+        var Vgt = [Vis.pxbar*Vis.t/Vis.m, Vis.pybar*Vis.t/Vis.m];
+        var Vgtsq = (Math.pow(Vis.pxbar*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar*Vis.t/Vis.m, 2));
 
         for (let i=0; i < Vis.Nx; i++) {
             for (let j=0; j < Vis.Ny; j++) {
                 var n = Vis.Ny * i + j;
-                var phiReal = 0;
-                var phiImag = 0;
-                for (pxcurrent = Vis.pxbar - 2*Vis.sigma; pxcurrent < Vis.pxbar + 2*Vis.sigma; pxcurrent += 0.1) {
-                    for (pycurrent = Vis.pybar - 2*Vis.sigma; pycurrent < Vis.pybar + 2*Vis.sigma; pycurrent += 0.1) {
-                      var E = (Math.pow(pxcurrent, 2) + Math.pow(pycurrent, 2))/(2*Vis.m);
-                      var fpmag = Math.exp(-0.5*(Math.pow(pxcurrent-Vis.pxbar, 2)+Math.pow(pycurrent-Vis.pybar, 2)/Math.pow(Vis.sigma, 2)));
-                      phiReal += fpmag*Math.cos((pxcurrent*Vis.a*i + pycurrent*Vis.a*j) - (pxcurrent*Vis.xbar + pycurrent*Vis.ybar) - E*Vis.t);
-                      phiImag += fpmag*Math.sin((pxcurrent*Vis.a*i + pycurrent*Vis.a*j) - (pxcurrent*Vis.xbar + pycurrent*Vis.ybar) - E*Vis.t);
-                    }
-                }
-                Vis.pointR[n] = 0.1 + A*(Math.pow(phiReal, 2) + Math.pow(phiImag, 2)); //We want the size of point between 0.1 and 0.2
+                var xvec = [Vis.a*i, Vis.a*j];
+                var xsq = (Math.pow(Vis.a*i, 2) + Math.pow(Vis.a*j, 2));
+                phiSq = Math.exp(-Math.pow(Vis.sigma, 2)*Math.abs(xsq + x0sq + Vgtsq + 2*(math.dot(x0vec, Vgt) - math.dot(xvec, Vgt) - math.dot(xvec, x0vec))));
+                Vis.pointR[n] = 0.2*phiSq + 0.05;
             }
         }
     },
