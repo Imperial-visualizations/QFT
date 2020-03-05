@@ -79,6 +79,9 @@ Vis.core = {
         Vis.sigmaRange.value = Vis.sigma;
         Vis.sigmaDisplay.textContent = Vis.sigma;
 
+        Vis.massRange.value = Vis.m;
+        Vis.massDisplay.textContent = Vis.m;
+
     },
 
 }
@@ -106,11 +109,10 @@ Vis.workers = {
 
 Vis.setup = {
     initConsts: function() {
-        Vis.a = 0.5; // atomic spacing
-        Vis.m = 1; // mass of particle
+        Vis.a = 0.5; // point spacing
 
-        Vis.Nx = 40; // # of atoms in x direction
-        Vis.Ny = 40; // # of atoms in y direction
+        Vis.Nx = 40; // # of points in x direction
+        Vis.Ny = 40; // # of points in y direction
         Vis.N = Vis.Nx * Vis.Ny;
 
         Vis.canvasx = 450;
@@ -137,6 +139,7 @@ Vis.setup = {
         Vis.pxbar = 0.5;
         Vis.pybar = 0.5;
         Vis.sigma = 0.5;
+        Vis.m = 1;
 
         Vis.pointR = new Array(Vis.N);
     },
@@ -215,6 +218,14 @@ Vis.setup = {
         Vis.sigmaRange.addEventListener('input', function() {
             Vis.sigma = Vis.sigmaRange.value;
             Vis.sigmaDisplay.textContent = Vis.sigma;
+        });
+
+        Vis.massRange = document.getElementById('mass-range');
+        Vis.massDisplay = document.getElementById('mass-display');
+
+        Vis.massRange.addEventListener('input', function() {
+            Vis.m = Vis.massRange.value;
+            Vis.massDisplay.textContent = Vis.m;
         });
 
         Vis.core.updateSliders();
