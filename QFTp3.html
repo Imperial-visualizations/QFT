@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!--Title-->
-    <title>QFT Version</title>
+    <title>QFT p3</title>
     <!--css links-->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -51,7 +51,11 @@
                 <div>
                     <!-- <button id="buttonPlay">Play</button> -->
                     <button id="buttonRestart">Restart</button>
-                </div>              
+                </div>
+                <label class="slider-label">
+                    $t$ =
+                    <span id="time-display">10</span>
+                </label>     
                 <!--BEGIN Slider-->
                 <label class="slider-label">
                     $\bar{x}$ :
@@ -77,22 +81,22 @@
                 <!--BEGIN Slider-->
                 <label class="slider-label">
                     $\bar{p}_x$ :
-                    <span id="pxbar-display">0</span>
+                    <span id="pxbar-display">0.25</span>
                 </label>
                 <label class="slider">
                     <span class="sliderMin">-1</span>
-                    <input id="pxbar-range" class="inputs" max="1" min="-1" name="r" step="0.01" type="range" value="0"/>
+                    <input id="pxbar-range" class="inputs" max="1" min="-1" name="r" step="0.01" type="range" value="0.25"/>
                     <span class="sliderMax">1</span>
                 </label>
                 <!--END Slider-->
                 <!--BEGIN Slider-->
                 <label class="slider-label">
                     $\bar{p}_y$ :
-                    <span id="pybar-display">0</span>
+                    <span id="pybar-display">0.25</span>
                 </label>
                 <label class="slider">
                     <span class="sliderMin">-1</span>
-                    <input id="pybar-range" class="inputs" max="1" min="-1" name="r" step="0.01" type="range" value="0"/>
+                    <input id="pybar-range" class="inputs" max="1" min="-1" name="r" step="0.01" type="range" value="0.25"/>
                     <span class="sliderMax">1</span>
                 </label>
                 <!--END Slider-->
@@ -103,7 +107,7 @@
                 </label>
                 <label class="slider">
                     <span class="sliderMin">0.01</span>
-                    <input id="sigma-range" class="inputs" max="1" min="0.15" step="0.001" type="range" value="0.001"/>
+                    <input id="sigma-range" class="inputs" max="1" min="0.01" step="0.01" type="range" value="0.5"/>
                     <span class="sliderMax">1</span>
                 </label>
                 <!--END Slider-->
@@ -114,7 +118,7 @@
                 </label>
                 <label class="slider">
                     <span class="sliderMin">0.01</span>
-                    <input id="mass-range" class="inputs" max="1" min="0.15" step="0.001" type="range" value="0.001"/>
+                    <input id="mass-range" class="inputs" max="1" min="0.01" step="0.01" type="range" value="0.5"/>
                     <span class="sliderMax">1</span>
                 </label>
                 <!--END Slider-->
@@ -130,7 +134,7 @@
 
     
 </div>
-<script src="./scripts/QFTVersion.js"></script>
+<script src="./scripts/QFTp3.js"></script>
 
 </body>
 </html>

@@ -21,25 +21,25 @@ Vis.init = function() {
 Vis.start = function() {
     if (Vis._stoptime) {
         Vis._then += Date.now() - Vis._stoptime; // add stopped time
-    };
+    }
 
     if (!Vis.isRunning) {
         Vis.core.frame();
         Vis.isRunning = true;
-    };
+    }
 };
 
 Vis.stop = function() {
     window.cancelAnimationFrame(Vis.animationFrameLoop);
     Vis.isRunning = false;
     Vis._stoptime = Date.now(); // record when animation paused
-}
+};
 
 Vis.core = {
     frame: function() {
 
         Vis.t = (Date.now() - Vis._then) / 250; // time since start in seconds
-
+        Vis.timeDisplay.textContent = Number((Vis.t/4).toFixed(1));  // different timescale for display to make visual effects more prominent
         Vis.core.update();
         Vis.core.animate();
 
@@ -56,8 +56,7 @@ Vis.core = {
 
         for (let i=0; i < Vis.N; i++) {
             Vis.context.beginPath();
-            Vis.context.arc(Vis.convertCanvasX(Vis.x[i]), Vis.convertCanvasY(Vis.y[i])
-                                , Vis.convertCanvasX(Vis.pointR[i]), 0, 2*Math.PI);
+            Vis.context.arc(Vis.convertCanvasX(Vis.x[i]), Vis.convertCanvasY(Vis.y[i]), Vis.convertCanvasX(Vis.pointR[i]), 0, 2*Math.PI);
             Vis.context.fill();
         }
     },
@@ -84,7 +83,7 @@ Vis.core = {
 
     },
 
-}
+};
 
 Vis.workers = {
 
@@ -134,12 +133,12 @@ Vis.setup = {
     initVars: function() {
         Vis._then = Date.now();
 
-        Vis.xbar = 5;
-        Vis.ybar = 5;
-        Vis.pxbar = 0.5;
-        Vis.pybar = 0.5;
+        Vis.xbar = 10;
+        Vis.ybar = 10;
+        Vis.pxbar = 0.25;
+        Vis.pybar = 0.25;
         Vis.sigma = 0.5;
-        Vis.m = 1;
+        Vis.m = 0.5;
 
         Vis.pointR = new Array(Vis.N);
     },
@@ -179,6 +178,8 @@ Vis.setup = {
     },
 
     initSlider: function() {
+
+        Vis.timeDisplay = document.getElementById('time-display');
 
         Vis.xbarRange = document.getElementById('xbar-range');
         Vis.xbarDisplay = document.getElementById('xbar-display');

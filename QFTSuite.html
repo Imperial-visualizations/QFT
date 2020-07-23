@@ -1,0 +1,299 @@
+<!--Author: Darren Lean-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--Title-->
+    <title>QFT</title>
+    <!--css links-->
+    <link href="styles/style.css" rel="stylesheet">
+    <link href="styles/skeleton.css" rel="stylesheet">
+    <link href="styles/index_Style.css" rel="stylesheet">
+    <link href="styles/loadout_Style.css" rel="stylesheet">
+    <!--Required JS resources-->
+    <script src="https://unpkg.com/vue@2.3.3/dist/vue.js"></script>
+    <script src="scripts/debounce_and_throttle.js"></script>
+    <script type="text/x-mathjax-config">
+        MathJax.Hub.Config({
+            extensions: ["tex2jax.js"],
+            jax: ["input/TeX", "output/HTML-CSS"],
+            tex2jax: {
+            inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+            processEscapes: true
+            },
+            "HTML-CSS": { fonts: ["TeX"] }
+        });
+    </script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+</head>
+
+<body>
+<div id="app">
+    <!--   Title of non-current sections to appear on hovering above respective number in navbar     -->
+    <div id="hoverTitleSpace" :style="{left: mouseX +'px'}" v-show="hoverTitle !== false">
+        {{hoverTitle}}
+    </div>
+    <!--    Left Side of Window - containing mainly text    -->
+    <div class="vis-container left" id="left-container">
+        <!--     Dynamic Navigation Bar and Section Headings       -->
+        <div class="" id="progress-container">
+            <!--    Dynamic Section Heading Text - overlaid on meters    -->
+            <!--    Also act as buttons to navigate between sections    -->
+            <!-- Remember to change all the numbers when adding sections -->
+
+            <div class="" id="overlay" @mousemove="hoverTitle !== false ? updateMouseX($event) : ''">
+                <button :class="[currentTitle === 1 ? 'activeButton' : '', 'overlay-button']" id="sectionTitle1"
+                        key="sectionTitle1" data-no=1 @click="scrollTo($event)" @mouseover="hoverPosUpdate($event); selectHover();" @mouseout="hoverTitle=false">{{sectionTitle[0]}}
+                </button>
+                <button :class="[currentTitle === 2 ? 'activeButton' : '', 'overlay-button']" id="sectionTitle2"
+                        key="sectionTitle2" data-no=2 @click="scrollTo($event)" @mouseover="hoverPosUpdate($event); selectHover();" @mouseout="hoverTitle=false">{{sectionTitle[1]}}
+                </button>
+                <button :class="[currentTitle === 3 ? 'activeButton' : '', 'overlay-button']" id="sectionTitle3"
+                        key="sectionTitle3" data-no=3 @click="scrollTo($event)" @mouseover="hoverPosUpdate($event); selectHover();" @mouseout="hoverTitle=false">{{sectionTitle[2]}}
+                </button>
+
+            </div>
+            <!--    Dynamic meters indicating progress through each section    -->
+            <meter :class="[currentTitle === 1 ? 'activeMeter' : '']" id="m1" :min="sectionTops[0]"
+                   :max="sectionBottoms[0]" :value="scrollPos"></meter>
+            <meter :class="[currentTitle === 2 ? 'activeMeter' : '']" id="m2" :min="sectionTops[1]"
+                   :max="sectionBottoms[1]" :value="scrollPos"></meter>
+            <meter :class="[currentTitle === 3 ? 'activeMeter' : '']" id="m3" :min="sectionTops[2]"
+                   :max="sectionBottoms[2]" :value="scrollPos"></meter>
+
+            <div id="banner-dummy"></div>
+        </div>
+        <!--    Container for text content split into sections    -->
+        <div class="journey" id="main-journey" @scroll.passive="scrollFunc">
+            <!--    Section Text Containers   -->
+            <div class="section-container" id="sc1">
+                <div class="placeholder" id="ph1">
+                    <hr>
+                    <h2 class="text section-head" id="s1">
+                        {{sectionTitleLong[0]}}
+                    </h2>
+                    <hr>
+                </div>
+                <!--  Functionality 1 : change the right side within the section-->
+                <div class="text section-body odd" id="p1">
+                    <p>
+                        Given some solid, how can we model sound waves moving through it?
+                    </p>
+                    <p>
+                        Let us assume that this is a simple solid, made of identical atoms spaced evenly.
+                        We know that atoms in a solid lattice are held together by binding forces, for example ionic, covalent and metallic bonds.
+                        The Mie potential shown on the right is generally a good model for binding forces in solids.
+                    </p>
+                    <p>
+                        Let us model the binding forces using springs. 
+                        We model all atoms as connected to only their nearest neighbours by identical springs.
+                        This model is accurate in the small displacement limit, that is the low temperature limit.
+                    </p>
+                    <p>
+                        Let's explore this model. 
+                        We will start considering the simple case of a one dimensional lattice, building up the theory. 
+                        Here we will develop the concept of the first Brillouin Zone and how energy moves through the solid in the form of waves.
+                        Then we will look at a two dimensional lattice and consider transverse and longitudinal waves passing through the solid.
+                        We will continue to three dimensional solids for completeness.
+                    </p>
+  
+</div></div>
+
+
+            <div class="section-container" id="sc2">
+                <div class="placeholder" id="ph2">
+                    <hr>
+                    <h2 class="text section-head" id="s2">
+                        {{sectionTitleLong[1]}}
+                    </h2>
+                    <hr>
+                </div>
+                <!--  Functionality 2: section with 3 tabs-->
+                <div class="text section-body odd" id="p2">
+
+                        <p>
+                            We start with the one dimensional case: 
+                            imagine having a chain of identical atoms.
+                            We then approximate their interactions to only be with nearest neighbours.
+                            We do this by saying that neighbouring atoms are connected by springs, all of which are identical.
+                        </p>
+                        <p>
+                            The solution to this model is most easily dealt with when the infinite lattice approximation is made.
+                            This is where we approximate the solid size as much larger than the maximum displacement of individual atoms.
+                            This is physically acceptable as in reality, atom movements in solids are much smaller than the size of the solids.
+                        
+                            The most general solution is
+                            $$ u_n(t) = Re \sum_{k}\tilde{u}_k e^{i(nka-\omega_kt)} .$$
+                        
+                            This is a sum of an arbitrary number of waves, each with their own wavevector.                
+                            $u_n$ is the displacement of the $n^{th}$ atom from its equilibrium position
+                            and
+                            $k$ is the wavevector of the incoming wave.
+                        </p>
+                        <p>
+                            Here we simulate for a single $k$:
+                            $$ u_n(t) = u_k \cos(nka-\omega_kt)$$
+                        
+                            For any given $k$:
+                            $$ \omega_k = 2 \omega_D \left| \sin \left( \frac{k a}{2} \right) \right|$$
+                            where
+                            $$ \omega_D = \sqrt{\frac{\kappa}{m}}$$
+                            $\kappa$ is the spring constant,
+                            $m$ is the mass of a single atom,
+                            $a$ is the atomic spacing
+                            and
+                            $\omega_D$ is also known as the Debye frequency.
+                            Here, we assume $a = \omega_D = 1$ and $\tilde{u}_k$ has zero phase for simplicity.
+                        </p>  
+                        <p>
+                            $u_k$ is the amplitude of the response of the individual atoms to wave mode $k$.
+                            Notice that the overall motion is unaffected if $2n \pi$ for any integer $n$ is added to $k$.
+                            Mathematically, this is due to the factor $e^{i2n\pi} = 1$ in the general solution.
+                            Physically, it makes sense due to the given trigonometric dispersion relation for $\omega_k$ - 
+                            $k + 2n\pi$ has the same energy as $k$. 
+                            (Try adding integer multiple of 2 to the $r$ value!)
+                        </p>
+                        <p>
+                            For the upcoming visualisations, we will ignore this redundancy by taking 
+                            $-\pi \lt ka \leqslant \pi $, known as the first Brillouin Zone. 
+                            This applies to components in the higher dimensions too.
+                        </p>
+                        <p>                            
+                            Also notice that when $r \to \pm 1$, there are two standing waves. 
+                            Neighbouring atoms move in anti-phase.
+                            (Reduce $u_k$ to see this effect better.)
+                        </p>
+                </div>
+            </div>
+
+            <div class="section-container" id="sc3">
+                <div class="placeholder" id="ph3">
+                    <hr>
+                    <h2 class="text section-head" id="s3">
+                        {{sectionTitleLong[2]}}
+                    </h2>
+                    <hr>
+                </div>
+                <!--  an example section with content and 2 tabs-->
+                <div class="text section-body odd" id="p3">
+                    <p>
+                        Now consider an infinitely wide sheet of identical atoms.
+
+                        The most general solution is:
+                        $$ \textbf{u}_n(t) = Re \sum_{\textbf{k}}\tilde{\textbf{u}}_\textbf{k} e^{i(\textbf{k} \cdot \textbf{r} - \omega_\textbf{k} t)} $$
+                        
+                        where
+                        $\textbf{u}_n$ is the displacement of the $n^{th}$ atom
+                        and
+                        $\textbf{k}$ is the wavevector of each incoming wave.
+                    </p>
+                    <p>
+                        We simulate for a single $\mathbf{k}$:
+                        $$ \textbf{u}_n(t) = \textbf{u}_\textbf{k} \cos(\textbf{k} \cdot \textbf{r}-\omega_k t)$$
+
+                        For any given $\mathbf{k}$:
+                        $$ \omega^2_{\mathbf{k}} = 4 \omega^2_D \left[ \sin^2 \left(\frac{k_x a}{2} \right) + \sin^2 \left(\frac{k_y a}{2} \right) \right]$$
+                        where
+                        $$ \omega_D = \sqrt{\frac{\kappa}{m}}$$
+                        $\kappa$ is the spring constant,
+                        $m$ is the mass of a single atom,
+                        $a$ is the atomic spacing
+                        and
+                        $\omega_D$ is also known as the Debye frequency.
+                        We also assume $a = \omega_D = 1$ and $\tilde{\textbf{u}}_\textbf{k}$ has zero phase for simplicity.
+                    </p>
+                    <p>
+                        We also trace the wave, which travels at phase velocity $\mathbf{v}=\frac{\mathbf{k}}{w}$.
+                    </p>
+                    <p>
+                        $\textbf{u}_k$ represents the response of the individual atoms to wave $\textbf{k}$.
+                        Notice that $|\textbf{k} \cdot \textbf{u}_k|$ and $|\textbf{k} \times \textbf{u}_k|$
+                        determine the type of wave: longitudinal, transverse or a combination of both. 
+                        Try making $|\textbf{k} \cdot \textbf{u}_k| = 0 $ or $|\textbf{k} \times \textbf{u}_k| = 0 $.
+                        What are the types of wave you see in these respective cases?
+                    </p>   
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!--    Right Side of Window - containing mainly interactive and visual content    -->
+    <div class="vis-container right" id="right-container">
+        <!--    Title Banner above Right Side    -->
+        <div class="banner">
+            <!--    Visualisation Title    -->
+            <h1 class="" id="vis-title">
+                Quantum Field Theory
+            </h1>
+            <a href="https://www.imperialvisualisations.com/learn/">
+                <img id="vis-logo" src="./assets/VisualisationsLogoWhite2.png">
+            </a>
+        </div>
+        <!--    Space into which visualisations are loaded    -->
+        <div id="rightloadSpace">
+        <!--    fade transition tag for RHS - applied by Vue and CSS    -->
+        <transition-group name="fade" tag="div" class="transition-container">
+            <!--    Interactive Zone Containers   -->
+            <div class="rightload" id="loadwait" key="loadwait" v-if="true">
+                <!-- loading circle background-->
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            </div>
+            <div class="rightload text odd" id='loadout1' key="loadout1" v-if="currentSection === 1">
+                <div class="rightload text" id='loadout1sub1' key="loadout2sub1"
+                         v-if="subSection[0] === 1">
+                        <!--  add iframe link to the file here-->
+                    <iframe src="QFTp1.html" style="width: 67vw; height: 96vh"></iframe>
+
+
+                </div>
+
+            </div>
+            
+            <div class="rightload text odd" id='loadout2' key="loadout2" v-if="currentSection === 2">
+
+
+                    <!--Interactive Zone Sub Containers-->
+                    <div class="rightload text" id='loadout2sub1' key="loadout2sub1"
+                         v-if="subSection[1] === 1">
+                        <iframe src="QFTp2.html" style="width: 67vw; height: 96vh"></iframe>
+
+
+                    </div>
+
+            </div>
+
+            <div class="rightload text even" id='loadout3' key="loadout3" v-if="currentSection === 3">
+
+                <!--Interactive Zone Sub Containers-->
+                <div class="rightload text" id='loadout3sub1' key="loadout3sub1"
+                     v-if="subSection[2] === 1">
+
+                    <iframe src="QFTp3.html" style='width: 100%; height: 100%'></iframe>
+
+
+
+                </div>
+
+
+            </div>
+
+
+
+
+        </transition-group>
+    </div>
+    </div>
+
+</div>
+</body>
+
+<script src="scripts/nav_Script.js"></script>
+
+</html>

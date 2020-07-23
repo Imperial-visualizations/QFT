@@ -15,7 +15,7 @@ let app = new Vue ({
         sectionBottoms: [],
         innerchange:[],
         // the title of each section
-        sectionTitleLong: ["Introduction", "One Dimensional",  "Two Dimensional", "Three Dimensional"],
+        sectionTitleLong: ["im in nav_Script.js", "page 2",  "page 3"],
         // the number of each section
         sectionTitleShort: ["1","2","3","4"],
         sectionTitle: [],

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!--Title-->
+    <title>QFT p2</title>
+    <!--css links-->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" rel="stylesheet"
+        integrity='sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ' crossorigin='anonymous'>
+    <link href="styles/style.css" rel="stylesheet">
+
+    <!--Required JS resources-->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/6.2.2/math.min.js"
+    integrity="sha256-D/MkugLuxx4Xx0Kb92cUhpxlCMhUvQ0eOtEL8Ol23jM=" crossorigin="anonymous"></script>
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    extensions: ["tex2jax.js"],
+    jax: ["input/TeX", "output/HTML-CSS"],
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+      processEscapes: true
+    },
+    "HTML-CSS": { fonts: ["TeX"] }
+  });
+    </script>
+    <script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>
+</head>
+
+<body>
+    <!--    Right Side of Window - containing mainly interactive and visual content    -->
+    <div class="my-vis-space" style="padding-left:15px;padding-top:10px;overflow-y: auto;">
+        <!--Visualisation main canvas-->
+        <div id="canvas-div" style="width: 50%; float: left; margin-right:10%"></div>
+
+        <!--Buttons/Sliders-->
+        <div class="overall-sliders-container" style="float: left;">
+
+        <!--Buttons/Sliders-->
+        <div>
+            <div style="width: 100%; float: left;">   
+                <div>
+                    <!-- <button id="buttonPlay">Play</button> -->
+                    <button id="buttonRestart">Restart</button>
+                </div>
+                <label class="slider-label">
+                    $t$ =
+                    <span id="time-display">10</span>
+                </label>     
+                <!--BEGIN Slider-->
+                <label class="slider-label">
+                    $\bar{x}$ :
+                    <span id="xbar-display">10</span>
+                </label>
+                <label class="slider">
+                    <span class="sliderMin">0</span>
+                    <input id="xbar-range" class="inputs" max="20" min="0" name="r" step="0.01" type="range" value="10"/>
+                    <span class="sliderMax">20</span>
+                </label>
+                <!--END Slider-->
+                <!--BEGIN Slider-->
+                <label class="slider-label">
+                    $\bar{y}$ :
+                    <span id="ybar-display">10</span>
+                </label>
+                <label class="slider">
+                    <span class="sliderMin">0</span>
+                    <input id="ybar-range" class="inputs" max="20" min="0" name="r" step="0.01" type="range" value="10"/>
+                    <span class="sliderMax">20</span>
+                </label>
+                <!--END Slider-->
+                <!--BEGIN Slider-->
+                <label class="slider-label">
+                    $\bar{p}_x$ :
+                    <span id="pxbar-display">0.25</span>
+                </label>
+                <label class="slider">
+                    <span class="sliderMin">-1</span>
+                    <input id="pxbar-range" class="inputs" max="1" min="-1" name="r" step="0.01" type="range" value="0.25"/>
+                    <span class="sliderMax">1</span>
+                </label>
+                <!--END Slider-->
+                <!--BEGIN Slider-->
+                <label class="slider-label">
+                    $\bar{p}_y$ :
+                    <span id="pybar-display">0.25</span>
+                </label>
+                <label class="slider">
+                    <span class="sliderMin">-1</span>
+                    <input id="pybar-range" class="inputs" max="1" min="-1" name="r" step="0.01" type="range" value="0.25"/>
+                    <span class="sliderMax">1</span>
+                </label>
+                <!--END Slider-->
+                <!--BEGIN Slider-->
+                <label class="slider-label">
+                    $\sigma$ :
+                    <span id="sigma-display">0.5</span>
+                </label>
+                <label class="slider">
+                    <span class="sliderMin">0.01</span>
+                    <input id="sigma-range" class="inputs" max="1" min="0.01" step="0.01" type="range" value="0.5"/>
+                    <span class="sliderMax">1</span>
+                </label>
+                <!--END Slider-->
+                <!--BEGIN Slider-->
+                <label class="slider-label">
+                    $m$ :
+                    <span id="mass-display">0.5</span>
+                </label>
+                <label class="slider">
+                    <span class="sliderMin">0.01</span>
+                    <input id="mass-range" class="inputs" max="1" min="0.01" step="0.01" type="range" value="0.5"/>
+                    <span class="sliderMax">1</span>
+                </label>
+                <!--END Slider-->
+
+            </div>
+
+    
+        </div>
+
+    </div>
+
+
+
+    
+</div>
+<script src="./scripts/QFTp2.js"></script>
+
+</body>
+</html>
