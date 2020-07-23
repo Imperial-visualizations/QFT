@@ -10,9 +10,10 @@ Vis.init = function() {
     Vis.setup.initConsts();
     Vis.setup.initVars();
 
+    Arrow.init(); // init arrows
+
     Vis.setup.initGraph();
     Vis.setup.initButton();
-    Vis.setup.initSlider();
 
     Vis.start();
     //Vis.stop();
@@ -61,45 +62,29 @@ Vis.core = {
         }
     },
 
-    updateSliders: function() {
-
-        Vis.xbarRange.value = Vis.xbar;
-        Vis.xbarDisplay.textContent = Vis.xbar;
-
-        Vis.ybarRange.value = Vis.ybar;
-        Vis.ybarDisplay.textContent = Vis.ybar;
-
-        Vis.pxbarRange.value = Vis.pxbar;
-        Vis.pxbarDisplay.textContent = Vis.pxbar;
-
-        Vis.pybarRange.value = Vis.pybar;
-        Vis.pybarDisplay.textContent = Vis.pybar;
-
-        Vis.sigmaRange.value = Vis.sigma;
-        Vis.sigmaDisplay.textContent = Vis.sigma;
-
-        Vis.massRange.value = Vis.m;
-        Vis.massDisplay.textContent = Vis.m;
-
-    },
-
 };
 
 Vis.workers = {
 
     calcPos: function() {
 
-        var x0vec = [Vis.xbar, Vis.ybar];
-        var x0sq = (Math.pow(Vis.xbar, 2) + Math.pow(Vis.ybar, 2));
-        var Vgt = [Vis.pxbar*Vis.t/Vis.m, Vis.pybar*Vis.t/Vis.m];
-        var Vgtsq = (Math.pow(Vis.pxbar*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar*Vis.t/Vis.m, 2));
+        var x0vec1 = [Vis.xbar1, Vis.ybar1];
+        var x0sq1 = (Math.pow(Vis.xbar1, 2) + Math.pow(Vis.ybar1, 2));
+        var Vgt1 = [Vis.pxbar1*Vis.t/Vis.m, Vis.pybar1*Vis.t/Vis.m];
+        var Vgtsq1 = (Math.pow(Vis.pxbar1*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar1*Vis.t/Vis.m, 2));
+
+        var x0vec2 = [Vis.xbar2, Vis.ybar2];
+        var x0sq2 = (Math.pow(Vis.xbar2, 2) + Math.pow(Vis.ybar2, 2));
+        var Vgt2 = [Vis.pxbar2*Vis.t/Vis.m, Vis.pybar2*Vis.t/Vis.m];
+        var Vgtsq2 = (Math.pow(Vis.pxbar2*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar2*Vis.t/Vis.m, 2));
 
         for (let i=0; i < Vis.Nx; i++) {
             for (let j=0; j < Vis.Ny; j++) {
                 var n = Vis.Ny * i + j;
                 var xvec = [Vis.a*i, Vis.a*j];
                 var xsq = (Math.pow(Vis.a*i, 2) + Math.pow(Vis.a*j, 2));
-                phiSq = Math.exp(-Math.pow(Vis.sigma, 2)*Math.abs(xsq + x0sq + Vgtsq + 2*(math.dot(x0vec, Vgt) - math.dot(xvec, Vgt) - math.dot(xvec, x0vec))));
+                phiSq = Math.exp(-Math.pow(Vis.sigma, 2)*Math.abs(xsq + x0sq1 + Vgtsq1 + 2*(math.dot(x0vec1, Vgt1) - math.dot(xvec, Vgt1) - math.dot(xvec, x0vec1))));
+                phiSq += Math.exp(-Math.pow(Vis.sigma, 2)*Math.abs(xsq + x0sq2 + Vgtsq2 + 2*(math.dot(x0vec2, Vgt2) - math.dot(xvec, Vgt2) - math.dot(xvec, x0vec2))));
                 Vis.pointR[n] = 0.2*phiSq + 0.05;
             }
         }
@@ -128,15 +113,23 @@ Vis.setup = {
             }
         } 
 
+        Vis.timeDisplay = document.getElementById('time-display');
+
     },
 
     initVars: function() {
         Vis._then = Date.now();
 
-        Vis.xbar = 10;
-        Vis.ybar = 10;
-        Vis.pxbar = 0.25;
-        Vis.pybar = 0.25;
+        Vis.xbar1 = 5;
+        Vis.ybar1 = 5;
+        Vis.pxbar1 = 0.25;
+        Vis.pybar1 = 0.25;
+
+        Vis.xbar2 = 15;
+        Vis.ybar2 = 5;
+        Vis.pxbar2 = -0.25;
+        Vis.pybar2 = 0.25;
+
         Vis.sigma = 0.5;
         Vis.m = 0.5;
 
@@ -176,61 +169,167 @@ Vis.setup = {
             Vis._then = Date.now();
         });
     },
+};
 
-    initSlider: function() {
 
-        Vis.timeDisplay = document.getElementById('time-display');
+//---------------------------------//
+// Interactive Arrow Object        //
+//---------------------------------//
 
-        Vis.xbarRange = document.getElementById('xbar-range');
-        Vis.xbarDisplay = document.getElementById('xbar-display');
+window.Arrow = window.Arrow || {};
 
-        Vis.xbarRange.addEventListener('input', function() {
-            Vis.xbar = Vis.xbarRange.value;
-            Vis.xbarDisplay.textContent = Vis.xbar;
-        });
+Arrow.init = function() {
+    Arrow.setup.initConst();
+    Arrow.setup.initObjects();
+    Arrow.setup.initDrag();
 
-        Vis.ybarRange = document.getElementById('ybar-range');
-        Vis.ybarDisplay = document.getElementById('ybar-display');
+};
 
-        Vis.ybarRange.addEventListener('input', function() {
-            Vis.ybar = Vis.ybarRange.value;
-            Vis.ybarDisplay.textContent = Vis.ybar;
-        });
-
-        Vis.pxbarRange = document.getElementById('pxbar-range');
-        Vis.pxbarDisplay = document.getElementById('pxbar-display');
-
-        Vis.pxbarRange.addEventListener('input', function() {
-            Vis.pxbar = Vis.pxbarRange.value;
-            Vis.pxbarDisplay.textContent = Vis.pxbar;
-        });
-
-        Vis.pybarRange = document.getElementById('pybar-range');
-        Vis.pybarDisplay = document.getElementById('pybar-display');
-
-        Vis.pybarRange.addEventListener('input', function() {
-            Vis.pybar = Vis.pybarRange.value;
-            Vis.pybarDisplay.textContent = Vis.pybar;
-        });
-
-        Vis.sigmaRange = document.getElementById('sigma-range');
-        Vis.sigmaDisplay = document.getElementById('sigma-display');
-
-        Vis.sigmaRange.addEventListener('input', function() {
-            Vis.sigma = Vis.sigmaRange.value;
-            Vis.sigmaDisplay.textContent = Vis.sigma;
-        });
-
-        Vis.massRange = document.getElementById('mass-range');
-        Vis.massDisplay = document.getElementById('mass-display');
-
-        Vis.massRange.addEventListener('input', function() {
-            Vis.m = Vis.massRange.value;
-            Vis.massDisplay.textContent = Vis.m;
-        });
-
-        Vis.core.updateSliders();
+Arrow.core = {
+    draw: function() {
+        Arrow.core.drawArrow(Arrow.pArrow1);
+        Arrow.core.drawArrow(Arrow.pArrow2);
     },
+
+    drawArrow: function(arrow) {
+        Arrow.helpers.updateArrow(arrow);
+    }
+};
+
+Arrow.helpers = {
+    updateArrow: function(arrow) {
+        let tipx = (arrow.x + 1)*Arrow.width/2;
+        let tipy = (1 - arrow.y)*Arrow.height/2;
+
+        arrow.body.attr('x2', tipx)
+                  .attr('y2', tipy);
+        arrow.tip.attr('cx', tipx)
+                 .attr('cy', tipy);
+
+        if (tipy > 22) {
+            if (tipx < 85) {
+                arrow.text.attr('x', tipx + 10)
+                .attr('y', tipy - 7.5)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+            } else if (tipx < 100) {
+                arrow.text.attr('x', tipx + 10 - 80)
+                .attr('y', tipy - 7.5)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+            } else {
+                arrow.text.attr('x', tipx + 10 - 105)
+                .attr('y', tipy - 7.5)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+            }   
+        } else {
+            if (tipx < 85) {
+                arrow.text.attr('x', tipx)
+                .attr('y', tipy + 15)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+            } else if (tipx < 100) {
+                arrow.text.attr('x', tipx - 90)
+                .attr('y', tipy + 15)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+            } else {
+                arrow.text.attr('x', tipx - 110)
+                .attr('y', tipy + 15)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+            }   
+        }
+
+
+    },
+
+    convertCoords: function(sx, sy) {
+        x = 2*sx/Arrow.width - 1;
+        y = 1 - 2*sy/Arrow.height;
+        return [x, y];
+    },
+
+    updateAPP: function() {
+        Vis.pxbar1 = Arrow.pArrow1.x;
+        Vis.pybar1 = Arrow.pArrow1.y;
+
+        Vis.pxbar2 = Arrow.pArrow2.x;
+        Vis.pybar2 = Arrow.pArrow2.y;
+    }
+};
+
+Arrow.setup = {
+    initConst: function() {
+        Arrow.width = window.innerHeight*0.35;
+        Arrow.height = window.innerHeight*0.35;
+
+        Arrow.strokeWidth = 2;
+        Arrow.tipRadius = 5;
+    },
+
+    initObjects: function() {
+        Arrow.svg = d3.select('#momenta-arrow');
+        Arrow.svg.attr('width', Arrow.width)
+                 .attr('height', Arrow.height)
+                 .attr('style', 'border: 10px grey');
+
+        Arrow.pArrow1 = {
+            x: Vis.pxbar1,
+            y: Vis.pybar1,
+            stext: 'p1'
+        };
+
+        Arrow.pArrow2 = {
+            x: Vis.pxbar2,
+            y: Vis.pybar2,
+            stext: 'p2'
+        };
+
+        Arrow.setup.initArrow(Arrow.pArrow1);
+        Arrow.setup.initArrow(Arrow.pArrow2);
+    },
+
+    initDrag: function() {
+        function dragged(arrow) {
+            return function() {
+                let xy = Arrow.helpers.convertCoords(d3.event.x, d3.event.y);
+                if (xy[0] <= 1 && xy[0] >= -1 && xy[1] <= 1 && xy[1] >= -1)
+                {   arrow.x = xy[0];
+                    arrow.y = xy[1];    }
+                Arrow.helpers.updateArrow(arrow);
+                Arrow.helpers.updateAPP(); // sync arrow values with main vis
+            };
+        }
+        Arrow.pArrow1.tip.call(d3.drag().on('drag', dragged(Arrow.pArrow1)));
+        Arrow.pArrow2.tip.call(d3.drag().on('drag', dragged(Arrow.pArrow2)));
+    },
+
+    initArrow: function(arrow) {
+        arrow.container = Arrow.setup.createArrowContainer();
+        arrow.body = Arrow.setup.createArrowBody(arrow);
+        arrow.tip = Arrow.setup.createArrowTip(arrow);
+        arrow.text = Arrow.setup.createArrowText(arrow);
+
+        Arrow.helpers.updateArrow(arrow);
+    },
+
+    createArrowContainer: function() {
+        return Arrow.svg.append('svg')
+                        .attr('width', Arrow.width)
+                        .attr('height', Arrow.height);
+    },
+
+    createArrowBody: function(arrow) {
+        return arrow.container.append('line')
+                                  .attr('x1', Arrow.width/2).attr('y1', Arrow.width/2)
+                                  .attr('stroke-width', Arrow.strokeWidth)
+                                  .attr('stroke', 'black');
+    },
+
+    createArrowTip: function(arrow) {
+        return arrow.container.append('circle')
+                              .attr('r', Arrow.tipRadius);
+    },
+
+    createArrowText: function(arrow) {
+        return arrow.container.append('text');
+    }
 };
 
 document.addEventListener('DOMContentLoaded', Vis.init);
