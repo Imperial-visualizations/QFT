@@ -120,13 +120,13 @@ Vis.setup = {
     initVars: function() {
         Vis._then = Date.now();
 
-        Vis.xbar1 = 5;
-        Vis.ybar1 = 5;
+        Vis.xbar1 = 0;
+        Vis.ybar1 = 0;
         Vis.pxbar1 = 0.25;
         Vis.pybar1 = 0.25;
 
-        Vis.xbar2 = 15;
-        Vis.ybar2 = 5;
+        Vis.xbar2 = 20;
+        Vis.ybar2 = 0;
         Vis.pxbar2 = -0.25;
         Vis.pybar2 = 0.25;
 
@@ -180,26 +180,23 @@ window.Arrow = window.Arrow || {};
 
 Arrow.init = function() {
     Arrow.setup.initConst();
-    Arrow.setup.initObjects();
+    Arrow.setup.initPositionsArrows();
+    Arrow.setup.initMomentaArrows();
     Arrow.setup.initDrag();
-
-};
-
-Arrow.core = {
-    draw: function() {
-        Arrow.core.drawArrow(Arrow.pArrow1);
-        Arrow.core.drawArrow(Arrow.pArrow2);
-    },
-
-    drawArrow: function(arrow) {
-        Arrow.helpers.updateArrow(arrow);
-    }
 };
 
 Arrow.helpers = {
-    updateArrow: function(arrow) {
-        let tipx = (arrow.x + 1)*Arrow.width/2;
-        let tipy = (1 - arrow.y)*Arrow.height/2;
+    updateArrow: function(arrow, type) {
+        var tipx, tipy, dp;
+        if (type == 'p') {
+            tipx = (arrow.x + 1)*Arrow.width/2;
+            tipy = (1 - arrow.y)*Arrow.height/2;
+            dp = 2;
+        } else if (type == 'x') {
+            tipx = arrow.x*Arrow.width/20;
+            tipy = (1 - arrow.y/20)*Arrow.height;
+            dp = 1;
+        }
 
         arrow.body.attr('x2', tipx)
                   .attr('y2', tipy);
@@ -210,42 +207,73 @@ Arrow.helpers = {
             if (tipx < 85) {
                 arrow.text.attr('x', tipx + 10)
                 .attr('y', tipy - 7.5)
-                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
             } else if (tipx < 100) {
                 arrow.text.attr('x', tipx + 10 - 80)
                 .attr('y', tipy - 7.5)
-                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
             } else {
                 arrow.text.attr('x', tipx + 10 - 105)
                 .attr('y', tipy - 7.5)
-                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
             }   
         } else {
             if (tipx < 85) {
                 arrow.text.attr('x', tipx)
                 .attr('y', tipy + 15)
-                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
             } else if (tipx < 100) {
                 arrow.text.attr('x', tipx - 90)
                 .attr('y', tipy + 15)
-                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
             } else {
                 arrow.text.attr('x', tipx - 110)
                 .attr('y', tipy + 15)
-                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(2) + ', ' + Number(arrow.y).toFixed(2) + ')');
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
             }   
         }
 
 
     },
 
-    convertCoords: function(sx, sy) {
-        x = 2*sx/Arrow.width - 1;
-        y = 1 - 2*sy/Arrow.height;
+    convertCoords: function(sx, sy, type) {
+        if (type == 'p') {
+            x = 2*sx/Arrow.width - 1;
+            y = 1 - 2*sy/Arrow.height;
+            if (x > 1) {
+                x = 1;
+            } else if (x < -1){
+                x = -1;
+            }
+            if (y > 1) {
+                y = 1;
+            } else if (y < -1) {
+                y = -1;
+            }
+        } else if (type == 'x') {
+            x = 20*sx/Arrow.width;
+            y = 20*(1 - sy/Arrow.height);
+            if (x > 20) {
+                x = 20;
+            } else if (x < 0){
+                x = 0;
+            }
+            if (y > 20) {
+                y = 20;
+            } else if (y < 0) {
+                y = 0;
+            }
+        }
         return [x, y];
     },
 
     updateAPP: function() {
+        Vis.xbar1 = Arrow.xArrow1.x;
+        Vis.ybar1 = Arrow.xArrow1.y;
+
+        Vis.xbar2 = Arrow.xArrow2.x;
+        Vis.ybar2 = Arrow.xArrow2.y;
+
         Vis.pxbar1 = Arrow.pArrow1.x;
         Vis.pybar1 = Arrow.pArrow1.y;
 
@@ -263,7 +291,29 @@ Arrow.setup = {
         Arrow.tipRadius = 5;
     },
 
-    initObjects: function() {
+    initPositionsArrows: function() {
+        Arrow.svg = d3.select('#positions-arrow');
+        Arrow.svg.attr('width', Arrow.width)
+                 .attr('height', Arrow.height)
+                 .attr('style', 'border: 10px grey');
+
+        Arrow.xArrow1 = {
+            x: Vis.xbar1,
+            y: Vis.ybar1,
+            stext: 'x1'
+        };
+
+        Arrow.xArrow2 = {
+            x: Vis.xbar2,
+            y: Vis.ybar2,
+            stext: 'x2'
+        };
+
+        Arrow.setup.initArrow(Arrow.xArrow1, 'x');
+        Arrow.setup.initArrow(Arrow.xArrow2, 'x');
+    },
+
+    initMomentaArrows: function() {
         Arrow.svg = d3.select('#momenta-arrow');
         Arrow.svg.attr('width', Arrow.width)
                  .attr('height', Arrow.height)
@@ -281,32 +331,33 @@ Arrow.setup = {
             stext: 'p2'
         };
 
-        Arrow.setup.initArrow(Arrow.pArrow1);
-        Arrow.setup.initArrow(Arrow.pArrow2);
+        Arrow.setup.initArrow(Arrow.pArrow1, 'p');
+        Arrow.setup.initArrow(Arrow.pArrow2, 'p');
     },
 
     initDrag: function() {
-        function dragged(arrow) {
+        function dragged(arrow, type) {
             return function() {
-                let xy = Arrow.helpers.convertCoords(d3.event.x, d3.event.y);
-                if (xy[0] <= 1 && xy[0] >= -1 && xy[1] <= 1 && xy[1] >= -1)
-                {   arrow.x = xy[0];
-                    arrow.y = xy[1];    }
-                Arrow.helpers.updateArrow(arrow);
+                var xy = Arrow.helpers.convertCoords(d3.event.x, d3.event.y, type);
+                arrow.x = xy[0];
+                arrow.y = xy[1];
+                Arrow.helpers.updateArrow(arrow, type);
                 Arrow.helpers.updateAPP(); // sync arrow values with main vis
             };
         }
-        Arrow.pArrow1.tip.call(d3.drag().on('drag', dragged(Arrow.pArrow1)));
-        Arrow.pArrow2.tip.call(d3.drag().on('drag', dragged(Arrow.pArrow2)));
+        Arrow.xArrow1.tip.call(d3.drag().on('drag', dragged(Arrow.xArrow1, 'x')));
+        Arrow.xArrow2.tip.call(d3.drag().on('drag', dragged(Arrow.xArrow2, 'x')));
+        Arrow.pArrow1.tip.call(d3.drag().on('drag', dragged(Arrow.pArrow1, 'p')));
+        Arrow.pArrow2.tip.call(d3.drag().on('drag', dragged(Arrow.pArrow2, 'p')));
     },
 
-    initArrow: function(arrow) {
+    initArrow: function(arrow, type) {
         arrow.container = Arrow.setup.createArrowContainer();
-        arrow.body = Arrow.setup.createArrowBody(arrow);
+        arrow.body = Arrow.setup.createArrowBody(arrow, type);
         arrow.tip = Arrow.setup.createArrowTip(arrow);
         arrow.text = Arrow.setup.createArrowText(arrow);
 
-        Arrow.helpers.updateArrow(arrow);
+        Arrow.helpers.updateArrow(arrow, type);
     },
 
     createArrowContainer: function() {
@@ -315,11 +366,18 @@ Arrow.setup = {
                         .attr('height', Arrow.height);
     },
 
-    createArrowBody: function(arrow) {
-        return arrow.container.append('line')
-                                  .attr('x1', Arrow.width/2).attr('y1', Arrow.width/2)
-                                  .attr('stroke-width', Arrow.strokeWidth)
-                                  .attr('stroke', 'black');
+    createArrowBody: function(arrow, type) {
+        if (type == 'x') {
+            return arrow.container.append('line')
+            .attr('x1', 0).attr('y1', Arrow.width)
+            .attr('stroke-width', Arrow.strokeWidth)
+            .attr('stroke', 'black');
+        } else if (type == 'p') {
+            return arrow.container.append('line')
+            .attr('x1', Arrow.width/2).attr('y1', Arrow.width/2)
+            .attr('stroke-width', Arrow.strokeWidth)
+            .attr('stroke', 'black');
+        }
     },
 
     createArrowTip: function(arrow) {

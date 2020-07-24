@@ -10,9 +10,10 @@ Vis.init = function() {
     Vis.setup.initConsts();
     Vis.setup.initVars();
 
+    Arrow.init(); // init arrows
+
     Vis.setup.initGraph();
     Vis.setup.initButton();
-    Vis.setup.initSlider();
 
     Vis.start();
     //Vis.stop();
@@ -61,45 +62,29 @@ Vis.core = {
         }
     },
 
-    updateSliders: function() {
-
-        Vis.xbarRange.value = Vis.xbar;
-        Vis.xbarDisplay.textContent = Vis.xbar;
-
-        Vis.ybarRange.value = Vis.ybar;
-        Vis.ybarDisplay.textContent = Vis.ybar;
-
-        Vis.pxbarRange.value = Vis.pxbar;
-        Vis.pxbarDisplay.textContent = Vis.pxbar;
-
-        Vis.pybarRange.value = Vis.pybar;
-        Vis.pybarDisplay.textContent = Vis.pybar;
-
-        Vis.sigmaRange.value = Vis.sigma;
-        Vis.sigmaDisplay.textContent = Vis.sigma;
-
-        Vis.massRange.value = Vis.m;
-        Vis.massDisplay.textContent = Vis.m;
-
-    },
-
 };
 
 Vis.workers = {
 
     calcPos: function() {
 
-        var x0vec = [Vis.xbar, Vis.ybar];
-        var x0sq = (Math.pow(Vis.xbar, 2) + Math.pow(Vis.ybar, 2));
-        var Vgt = [Vis.pxbar*Vis.t/Vis.m, Vis.pybar*Vis.t/Vis.m];
-        var Vgtsq = (Math.pow(Vis.pxbar*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar*Vis.t/Vis.m, 2));
+        var x0vec1 = [Vis.xbar1, Vis.ybar1];
+        var x0sq1 = (Math.pow(Vis.xbar1, 2) + Math.pow(Vis.ybar1, 2));
+        var Vgt1 = [Vis.pxbar1*Vis.t/Vis.m, Vis.pybar1*Vis.t/Vis.m];
+        var Vgtsq1 = (Math.pow(Vis.pxbar1*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar1*Vis.t/Vis.m, 2));
+
+        var x0vec2 = [Vis.xbar2, Vis.ybar2];
+        var x0sq2 = (Math.pow(Vis.xbar2, 2) + Math.pow(Vis.ybar2, 2));
+        var Vgt2 = [Vis.pxbar2*Vis.t/Vis.m, Vis.pybar2*Vis.t/Vis.m];
+        var Vgtsq2 = (Math.pow(Vis.pxbar2*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar2*Vis.t/Vis.m, 2));
 
         for (let i=0; i < Vis.Nx; i++) {
             for (let j=0; j < Vis.Ny; j++) {
                 var n = Vis.Ny * i + j;
                 var xvec = [Vis.a*i, Vis.a*j];
                 var xsq = (Math.pow(Vis.a*i, 2) + Math.pow(Vis.a*j, 2));
-                phiSq = Math.exp(-Math.pow(Vis.sigma, 2)*Math.abs(xsq + x0sq + Vgtsq + 2*(math.dot(x0vec, Vgt) - math.dot(xvec, Vgt) - math.dot(xvec, x0vec))));
+                phiSq = Math.exp(-Math.pow(Vis.sigma, 2)*Math.abs(xsq + x0sq1 + Vgtsq1 + 2*(math.dot(x0vec1, Vgt1) - math.dot(xvec, Vgt1) - math.dot(xvec, x0vec1))));
+                phiSq += Math.exp(-Math.pow(Vis.sigma, 2)*Math.abs(xsq + x0sq2 + Vgtsq2 + 2*(math.dot(x0vec2, Vgt2) - math.dot(xvec, Vgt2) - math.dot(xvec, x0vec2))));
                 Vis.pointR[n] = 0.2*phiSq + 0.05;
             }
         }
@@ -128,15 +113,23 @@ Vis.setup = {
             }
         } 
 
+        Vis.timeDisplay = document.getElementById('time-display');
+
     },
 
     initVars: function() {
         Vis._then = Date.now();
 
-        Vis.xbar = 10;
-        Vis.ybar = 10;
-        Vis.pxbar = 0.25;
-        Vis.pybar = 0.25;
+        Vis.xbar1 = 0;
+        Vis.ybar1 = 0;
+        Vis.pxbar1 = 0.25;
+        Vis.pybar1 = 0.25;
+
+        Vis.xbar2 = 20;
+        Vis.ybar2 = 0;
+        Vis.pxbar2 = -0.25;
+        Vis.pybar2 = 0.25;
+
         Vis.sigma = 0.5;
         Vis.m = 0.5;
 
@@ -176,61 +169,225 @@ Vis.setup = {
             Vis._then = Date.now();
         });
     },
+};
 
-    initSlider: function() {
 
-        Vis.timeDisplay = document.getElementById('time-display');
+//---------------------------------//
+// Interactive Arrow Object        //
+//---------------------------------//
 
-        Vis.xbarRange = document.getElementById('xbar-range');
-        Vis.xbarDisplay = document.getElementById('xbar-display');
+window.Arrow = window.Arrow || {};
 
-        Vis.xbarRange.addEventListener('input', function() {
-            Vis.xbar = Vis.xbarRange.value;
-            Vis.xbarDisplay.textContent = Vis.xbar;
-        });
+Arrow.init = function() {
+    Arrow.setup.initConst();
+    Arrow.setup.initPositionsArrows();
+    Arrow.setup.initMomentaArrows();
+    Arrow.setup.initDrag();
+};
 
-        Vis.ybarRange = document.getElementById('ybar-range');
-        Vis.ybarDisplay = document.getElementById('ybar-display');
+Arrow.helpers = {
+    updateArrow: function(arrow, type) {
+        var tipx, tipy, dp;
+        if (type == 'p') {
+            tipx = (arrow.x + 1)*Arrow.width/2;
+            tipy = (1 - arrow.y)*Arrow.height/2;
+            dp = 2;
+        } else if (type == 'x') {
+            tipx = arrow.x*Arrow.width/20;
+            tipy = (1 - arrow.y/20)*Arrow.height;
+            dp = 1;
+        }
 
-        Vis.ybarRange.addEventListener('input', function() {
-            Vis.ybar = Vis.ybarRange.value;
-            Vis.ybarDisplay.textContent = Vis.ybar;
-        });
+        arrow.body.attr('x2', tipx)
+                  .attr('y2', tipy);
+        arrow.tip.attr('cx', tipx)
+                 .attr('cy', tipy);
 
-        Vis.pxbarRange = document.getElementById('pxbar-range');
-        Vis.pxbarDisplay = document.getElementById('pxbar-display');
+        if (tipy > 22) {
+            if (tipx < 85) {
+                arrow.text.attr('x', tipx + 10)
+                .attr('y', tipy - 7.5)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
+            } else if (tipx < 100) {
+                arrow.text.attr('x', tipx + 10 - 80)
+                .attr('y', tipy - 7.5)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
+            } else {
+                arrow.text.attr('x', tipx + 10 - 105)
+                .attr('y', tipy - 7.5)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
+            }   
+        } else {
+            if (tipx < 85) {
+                arrow.text.attr('x', tipx)
+                .attr('y', tipy + 15)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
+            } else if (tipx < 100) {
+                arrow.text.attr('x', tipx - 90)
+                .attr('y', tipy + 15)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
+            } else {
+                arrow.text.attr('x', tipx - 110)
+                .attr('y', tipy + 15)
+                .text(arrow.stext + ' (' + Number(arrow.x).toFixed(dp) + ', ' + Number(arrow.y).toFixed(dp) + ')');
+            }   
+        }
 
-        Vis.pxbarRange.addEventListener('input', function() {
-            Vis.pxbar = Vis.pxbarRange.value;
-            Vis.pxbarDisplay.textContent = Vis.pxbar;
-        });
 
-        Vis.pybarRange = document.getElementById('pybar-range');
-        Vis.pybarDisplay = document.getElementById('pybar-display');
-
-        Vis.pybarRange.addEventListener('input', function() {
-            Vis.pybar = Vis.pybarRange.value;
-            Vis.pybarDisplay.textContent = Vis.pybar;
-        });
-
-        Vis.sigmaRange = document.getElementById('sigma-range');
-        Vis.sigmaDisplay = document.getElementById('sigma-display');
-
-        Vis.sigmaRange.addEventListener('input', function() {
-            Vis.sigma = Vis.sigmaRange.value;
-            Vis.sigmaDisplay.textContent = Vis.sigma;
-        });
-
-        Vis.massRange = document.getElementById('mass-range');
-        Vis.massDisplay = document.getElementById('mass-display');
-
-        Vis.massRange.addEventListener('input', function() {
-            Vis.m = Vis.massRange.value;
-            Vis.massDisplay.textContent = Vis.m;
-        });
-
-        Vis.core.updateSliders();
     },
+
+    convertCoords: function(sx, sy, type) {
+        if (type == 'p') {
+            x = 2*sx/Arrow.width - 1;
+            y = 1 - 2*sy/Arrow.height;
+            if (x > 1) {
+                x = 1;
+            } else if (x < -1){
+                x = -1;
+            }
+            if (y > 1) {
+                y = 1;
+            } else if (y < -1) {
+                y = -1;
+            }
+        } else if (type == 'x') {
+            x = 20*sx/Arrow.width;
+            y = 20*(1 - sy/Arrow.height);
+            if (x > 20) {
+                x = 20;
+            } else if (x < 0){
+                x = 0;
+            }
+            if (y > 20) {
+                y = 20;
+            } else if (y < 0) {
+                y = 0;
+            }
+        }
+        return [x, y];
+    },
+
+    updateAPP: function() {
+        Vis.xbar1 = Arrow.xArrow1.x;
+        Vis.ybar1 = Arrow.xArrow1.y;
+
+        Vis.xbar2 = Arrow.xArrow2.x;
+        Vis.ybar2 = Arrow.xArrow2.y;
+
+        Vis.pxbar1 = Arrow.pArrow1.x;
+        Vis.pybar1 = Arrow.pArrow1.y;
+
+        Vis.pxbar2 = Arrow.pArrow2.x;
+        Vis.pybar2 = Arrow.pArrow2.y;
+    }
+};
+
+Arrow.setup = {
+    initConst: function() {
+        Arrow.width = window.innerHeight*0.35;
+        Arrow.height = window.innerHeight*0.35;
+
+        Arrow.strokeWidth = 2;
+        Arrow.tipRadius = 5;
+    },
+
+    initPositionsArrows: function() {
+        Arrow.svg = d3.select('#positions-arrow');
+        Arrow.svg.attr('width', Arrow.width)
+                 .attr('height', Arrow.height)
+                 .attr('style', 'border: 10px grey');
+
+        Arrow.xArrow1 = {
+            x: Vis.xbar1,
+            y: Vis.ybar1,
+            stext: 'x1'
+        };
+
+        Arrow.xArrow2 = {
+            x: Vis.xbar2,
+            y: Vis.ybar2,
+            stext: 'x2'
+        };
+
+        Arrow.setup.initArrow(Arrow.xArrow1, 'x');
+        Arrow.setup.initArrow(Arrow.xArrow2, 'x');
+    },
+
+    initMomentaArrows: function() {
+        Arrow.svg = d3.select('#momenta-arrow');
+        Arrow.svg.attr('width', Arrow.width)
+                 .attr('height', Arrow.height)
+                 .attr('style', 'border: 10px grey');
+
+        Arrow.pArrow1 = {
+            x: Vis.pxbar1,
+            y: Vis.pybar1,
+            stext: 'p1'
+        };
+
+        Arrow.pArrow2 = {
+            x: Vis.pxbar2,
+            y: Vis.pybar2,
+            stext: 'p2'
+        };
+
+        Arrow.setup.initArrow(Arrow.pArrow1, 'p');
+        Arrow.setup.initArrow(Arrow.pArrow2, 'p');
+    },
+
+    initDrag: function() {
+        function dragged(arrow, type) {
+            return function() {
+                var xy = Arrow.helpers.convertCoords(d3.event.x, d3.event.y, type);
+                arrow.x = xy[0];
+                arrow.y = xy[1];
+                Arrow.helpers.updateArrow(arrow, type);
+                Arrow.helpers.updateAPP(); // sync arrow values with main vis
+            };
+        }
+        Arrow.xArrow1.tip.call(d3.drag().on('drag', dragged(Arrow.xArrow1, 'x')));
+        Arrow.xArrow2.tip.call(d3.drag().on('drag', dragged(Arrow.xArrow2, 'x')));
+        Arrow.pArrow1.tip.call(d3.drag().on('drag', dragged(Arrow.pArrow1, 'p')));
+        Arrow.pArrow2.tip.call(d3.drag().on('drag', dragged(Arrow.pArrow2, 'p')));
+    },
+
+    initArrow: function(arrow, type) {
+        arrow.container = Arrow.setup.createArrowContainer();
+        arrow.body = Arrow.setup.createArrowBody(arrow, type);
+        arrow.tip = Arrow.setup.createArrowTip(arrow);
+        arrow.text = Arrow.setup.createArrowText(arrow);
+
+        Arrow.helpers.updateArrow(arrow, type);
+    },
+
+    createArrowContainer: function() {
+        return Arrow.svg.append('svg')
+                        .attr('width', Arrow.width)
+                        .attr('height', Arrow.height);
+    },
+
+    createArrowBody: function(arrow, type) {
+        if (type == 'x') {
+            return arrow.container.append('line')
+            .attr('x1', 0).attr('y1', Arrow.width)
+            .attr('stroke-width', Arrow.strokeWidth)
+            .attr('stroke', 'black');
+        } else if (type == 'p') {
+            return arrow.container.append('line')
+            .attr('x1', Arrow.width/2).attr('y1', Arrow.width/2)
+            .attr('stroke-width', Arrow.strokeWidth)
+            .attr('stroke', 'black');
+        }
+    },
+
+    createArrowTip: function(arrow) {
+        return arrow.container.append('circle')
+                              .attr('r', Arrow.tipRadius);
+    },
+
+    createArrowText: function(arrow) {
+        return arrow.container.append('text');
+    }
 };
 
 document.addEventListener('DOMContentLoaded', Vis.init);

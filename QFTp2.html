@@ -37,25 +37,25 @@
 </head>
 
 <body>
-    <!--    Right Side of Window - containing mainly interactive and visual content    -->
-    <div class="my-vis-space" style="padding-left:15px;padding-top:10px;overflow-y: auto;">
-        <!--Visualisation main canvas-->
-        <div id="canvas-div" style="width: 50%; float: left; margin-right:10%"></div>
 
-        <div>
-            <button id="buttonRestart">Restart</button>
-        </div>
+  <!--    Right Side of Window - containing mainly interactive and visual content    -->
+  <div class="my-vis-space" style="padding-left:15px;padding-top:10px;overflow-y: auto;">
+    <!--Visualisation main canvas-->
+    <div id="canvas-div" style="width: 50%; float: left; margin-right:10%"></div>
 
-        <label>
-            $t$ = <span id="time-display">10</span>
-        </label>  
+    <div>
+        <button id="buttonRestart">Restart</button>
+    </div>
 
-        <!--Interactive arrow element-->
-        <svg id='positions-arrow' style="float: left"></svg>
-        <svg id='momenta-arrow' style="float: left"></svg>
+    <label>
+        $t$ = <span id="time-display">0</span>
+    </label>  
 
-    
-</div>
+    <!--Interactive arrow element-->
+    <svg id='positions-arrow' style="float: left"></svg>
+    <svg id='momenta-arrow' style="float: left"></svg>
+  </div>  
+
 <script src="./scripts/QFTp2.js"></script>
 
 </body>
