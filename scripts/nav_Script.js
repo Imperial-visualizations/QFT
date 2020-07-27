@@ -15,9 +15,9 @@ let app = new Vue ({
         sectionBottoms: [],
         innerchange:[],
         // the title of each section
-        sectionTitleLong: ["im in nav_Script.js", "page 2",  "page 3"],
+        sectionTitleLong: ["Non-interacting particle", "Two non-interacting particles",  "Two interacting particles"],
         // the number of each section
-        sectionTitleShort: ["1","2","3","4"],
+        sectionTitleShort: ["1","2","3"],
         sectionTitle: [],
         hoverPos: '',
         hoverTitle: false,

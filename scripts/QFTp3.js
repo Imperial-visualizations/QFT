@@ -120,18 +120,18 @@ Vis.setup = {
     initVars: function() {
         Vis._then = Date.now();
 
-        Vis.xbar1 = 0;
-        Vis.ybar1 = 0;
+        Vis.xbar1 = 2.5;
+        Vis.ybar1 = 2.5;
         Vis.pxbar1 = 0.25;
         Vis.pybar1 = 0.25;
 
-        Vis.xbar2 = 20;
-        Vis.ybar2 = 0;
+        Vis.xbar2 = 17.5;
+        Vis.ybar2 = 2.5;
         Vis.pxbar2 = -0.25;
         Vis.pybar2 = 0.25;
 
         Vis.sigma = 0.5;
-        Vis.m = 0.5;
+        Vis.m = 0.75;
 
         Vis.pointR = new Array(Vis.N);
     },
