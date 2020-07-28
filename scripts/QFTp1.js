@@ -91,7 +91,7 @@ Vis.workers = {
 
         var x0vec = [Vis.xbar, Vis.ybar];
         var x0sq = (Math.pow(Vis.xbar, 2) + Math.pow(Vis.ybar, 2));
-        var Vgt = [Vis.pxbar*Vis.t/Vis.m, Vis.pybar*Vis.t/Vis.m];
+        var Vgt = [Vis.pxbar*Vis.t/Vis.m, Vis.pybar*Vis.t/Vis.m];           //Using Schrodinger dispersion relation
         var Vgtsq = (Math.pow(Vis.pxbar*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar*Vis.t/Vis.m, 2));
 
         for (let i=0; i < Vis.Nx; i++) {
@@ -133,8 +133,8 @@ Vis.setup = {
     initVars: function() {
         Vis._then = Date.now();
 
-        Vis.xbar = 10;
-        Vis.ybar = 10;
+        Vis.xbar = 2.5;
+        Vis.ybar = 2.5;
         Vis.pxbar = 0.25;
         Vis.pybar = 0.25;
         Vis.sigma = 0.5;
