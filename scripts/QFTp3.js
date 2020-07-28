@@ -14,6 +14,7 @@ Vis.init = function() {
 
     Vis.setup.initGraph();
     Vis.setup.initButton();
+    Vis.setup.initSlider();
 
     Vis.start();
     //Vis.stop();
@@ -60,6 +61,13 @@ Vis.core = {
             Vis.context.arc(Vis.convertCanvasX(Vis.x[i]), Vis.convertCanvasY(Vis.y[i]), Vis.convertCanvasX(Vis.pointR[i]), 0, 2*Math.PI);
             Vis.context.fill();
         }
+    },
+
+    updateSliders: function() {
+
+        Vis.lambdaRange.value = Vis.lambda;
+        Vis.lambdaDisplay.textContent = Vis.lambda;
+
     },
 
 };
@@ -133,6 +141,8 @@ Vis.setup = {
         Vis.sigma = 0.5;
         Vis.m = 0.75;
 
+        Vis.lambda = 0.1;
+
         Vis.pointR = new Array(Vis.N);
     },
 
@@ -168,6 +178,19 @@ Vis.setup = {
         Vis.buttonRestart.addEventListener('click', function() {
             Vis._then = Date.now();
         });
+    },
+
+    initSlider: function() {
+
+        Vis.lambdaRange = document.getElementById('lambda-range');
+        Vis.lambdaDisplay = document.getElementById('lambda-display');
+
+        Vis.lambdaRange.addEventListener('input', function() {
+            Vis.lambda = Vis.lambdaRange.value;
+            Vis.lambdaDisplay.textContent = Vis.lambda;
+        });
+
+        Vis.core.updateSliders();
     },
 };
 

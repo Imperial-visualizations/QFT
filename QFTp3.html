@@ -41,7 +41,6 @@
     <div class="my-vis-space" style="padding-left:15px;padding-top:10px;overflow-y: auto;">
         <!--Visualisation main canvas-->
         <div id="canvas-div" style="width: 50%; float: left; margin-right:10%"></div>
-
         <div>
             <button id="buttonRestart">Restart</button>
         </div>
@@ -51,8 +50,20 @@
         </label>  
 
         <!--Interactive arrow element-->
-        <svg id='positions-arrow' style="float: left"></svg>
-        <svg id='momenta-arrow' style="float: left"></svg>
+        <svg id='positions-arrow' ></svg>
+        <svg id='momenta-arrow' ></svg>
+
+        <!--BEGIN Slider-->
+        <label class="slider-label">
+            $\lambda$ :
+            <span id="lambda-display">0.1</span>
+        </label>
+        <label class="slider">
+            <span class="sliderMin">0</span>
+            <input id="lambda-range" class="inputs" max="0.5" min="0" name="r" step="0.01" type="range" value="0.1"/>
+            <span class="sliderMax">0.5</span>
+        </label>
+        <!--END Slider-->
     </div>
 <script src="./scripts/QFTp3.js"></script>
 
