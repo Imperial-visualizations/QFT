@@ -9,6 +9,7 @@ Vis.init = function() {
 
     Vis.setup.initConsts();
     Vis.setup.initVars();
+    Vis.setup.initCondition();
 
     Arrow.init(); // init arrows
 
@@ -76,35 +77,93 @@ Vis.workers = {
 
     calcPos: function() {
 
-        var x0vec1 = [Vis.xbar1, Vis.ybar1];
-        var x0sq1 = (Math.pow(Vis.xbar1, 2) + Math.pow(Vis.ybar1, 2));
-        var Vgt1 = [Vis.pxbar1*Vis.t/Vis.m, Vis.pybar1*Vis.t/Vis.m];
-        var Vgtsq1 = (Math.pow(Vis.pxbar1*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar1*Vis.t/Vis.m, 2));
+        //Compute phi cubed
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+                Vis.phiCurrentTimeCubed[i][j] = math.pow(Vis.phiCurrentTime[i][j], 3);
+            }
+        }
 
-        var x0vec2 = [Vis.xbar2, Vis.ybar2];
-        var x0sq2 = (Math.pow(Vis.xbar2, 2) + Math.pow(Vis.ybar2, 2));
-        var Vgt2 = [Vis.pxbar2*Vis.t/Vis.m, Vis.pybar2*Vis.t/Vis.m];
-        var Vgtsq2 = (Math.pow(Vis.pxbar2*Vis.t/Vis.m, 2) + Math.pow(Vis.pybar2*Vis.t/Vis.m, 2));
+        //Compute laplacian of phi (nabla2Phi) using Finite Difference Method
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+                //The if statements sets the phi outside the grid to zero
+                if (i==0 || j==0 || i==Vis.Nx-1 || j==Vis.Ny-1){
+                    if (i==0){
+                        if (j==0){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else if (j==Vis.Ny-1){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i][j-1], Vis.phiCurrentTime[i+1][j]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else {
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i][j-1], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        }
+                    } else if (i==Vis.Nx-1) {
+                        if (j==0){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else if (j==Vis.Ny-1){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else {
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        }
+                    } else if (j==0) {
+                        if (i==0){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else if (i==Vis.Nx-1){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else {
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        }
+                    } else if (j==Vis.Ny-1){
+                        if (i==0){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else if (i==Vis.Nx-1){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else {
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        }
+                    }
+                } else {
+                    Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                }
+            }
+        }
 
+        //Compute second time derivative of phi (phiTwoDots)
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+                Vis.phiTwoDots[i][j] = math.add(Vis.nabla2Phi[i][j], math.add(math.multiply(-math.pow(Vis.m, 2), Vis.phiCurrentTime[i][j]), math.multiply(-Vis.lambda, Vis.phiCurrentTimeCubed[i][j])));
+            }
+        }
+
+        //Update phi: phiNewTime is for display
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+                Vis.phiOldTime[i][j] = Vis.phiCurrentTime[i][j]; 
+                Vis.phiCurrentTime[i][j] = Vis.phiNewTime[i][j]; 
+                //var testPhi = math.add(math.add(math.multiply(2, Vis.phiCurrentTime[i][j]), math.multiply(-1, Vis.phiOldTime[i][j])), math.multiply(math.pow(Vis.timeStep, 2), Vis.phiTwoDots[i][j]));
+                //var testPhisq = Math.pow(testPhi.re, 2) + Math.pow(testPhi.im, 2);
+                Vis.phiNewTime[i][j] = math.add(math.add(math.multiply(2, Vis.phiCurrentTime[i][j]), math.multiply(-1, Vis.phiOldTime[i][j])), math.multiply(math.pow(Vis.timeStep, 2), Vis.phiTwoDots[i][j]));
+            }
+        }
+
+        //Update display
         for (let i=0; i < Vis.Nx; i++) {
             for (let j=0; j < Vis.Ny; j++) {
                 var n = Vis.Ny * i + j;
-                var xvec = [Vis.a*i, Vis.a*j];
-                var xsq = (Math.pow(Vis.a*i, 2) + Math.pow(Vis.a*j, 2));
-                phiSq = Math.exp(-Math.pow(Vis.sigma, 2)*Math.abs(xsq + x0sq1 + Vgtsq1 + 2*(math.dot(x0vec1, Vgt1) - math.dot(xvec, Vgt1) - math.dot(xvec, x0vec1))));
-                phiSq += Math.exp(-Math.pow(Vis.sigma, 2)*Math.abs(xsq + x0sq2 + Vgtsq2 + 2*(math.dot(x0vec2, Vgt2) - math.dot(xvec, Vgt2) - math.dot(xvec, x0vec2))));
+                var phiSq = Math.pow(Vis.phiNewTime[i][j].re, 2) + Math.pow(Vis.phiNewTime[i][j].im, 2);
                 Vis.pointR[n] = 0.2*phiSq + 0.05;
             }
         }
+
     },
 };
 
 Vis.setup = {
     initConsts: function() {
-        Vis.a = 0.5; // point spacing
+        Vis.a = 0.25; // point spacing
 
-        Vis.Nx = 40; // # of points in x direction
-        Vis.Ny = 40; // # of points in y direction
+        Vis.Nx = 80; // # of points in x direction
+        Vis.Ny = 80; // # of points in y direction
         Vis.N = Vis.Nx * Vis.Ny;
 
         Vis.canvasx = 450;
@@ -121,6 +180,7 @@ Vis.setup = {
             }
         } 
 
+        Vis.timeStep = 1/50;
         Vis.timeDisplay = document.getElementById('time-display');
 
     },
@@ -128,22 +188,160 @@ Vis.setup = {
     initVars: function() {
         Vis._then = Date.now();
 
-        Vis.xbar1 = 2.5;
-        Vis.ybar1 = 2.5;
-        Vis.pxbar1 = 0.25;
-        Vis.pybar1 = 0.25;
+        Vis.xbar1 = 0;
+        Vis.ybar1 = 0;
+        Vis.pxbar1 = 1;
+        Vis.pybar1 = 0;
 
-        Vis.xbar2 = 17.5;
-        Vis.ybar2 = 2.5;
-        Vis.pxbar2 = -0.25;
-        Vis.pybar2 = 0.25;
+        Vis.xbar2 = 20;
+        Vis.ybar2 = 20;
+        Vis.pxbar2 = -1;
+        Vis.pybar2 = 0;
 
-        Vis.sigma = 0.5;
+        Vis.sigma = 0.3;
         Vis.m = 0.75;
 
         Vis.lambda = 0.1;
 
+        Vis.phiOldTime = [];
+        Vis.phiCurrentTime = [];
+        Vis.phiCurrentTimeCubed = [];
+        Vis.phiNewTime = [];
+        Vis.nabla2Phi = [];
+        Vis.phiOneDot = [];
+        Vis.phiTwoDots = [];
+
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+                Vis.phiOldTime.push(new Array(1));
+                Vis.phiCurrentTime.push(new Array(1));
+                Vis.phiCurrentTimeCubed.push(new Array(1));
+                Vis.phiNewTime.push(new Array(1));
+                Vis.nabla2Phi.push(new Array(1));    
+                Vis.phiOneDot.push(new Array(1));            
+                Vis.phiTwoDots.push(new Array(1));
+            }
+        }
+
         Vis.pointR = new Array(Vis.N);
+    },
+
+    initCondition: function() {
+
+        var x0vec1 = [Vis.xbar1, Vis.ybar1];
+        var pvec1 = [Vis.pxbar1, Vis.pybar1];
+        var psq1 = math.add(Math.pow(pvec1[0], 2), Math.pow(pvec1[1], 2));
+        var E1 = Math.pow(math.add(psq1, Math.pow(Vis.m, 2)), 0.5);
+        var Ep1 = 0.5*Math.pow(E1, -1);
+
+        var x0vec2 = [Vis.xbar2, Vis.ybar2];
+        var pvec2 = [Vis.pxbar2, Vis.pybar2];
+        var psq2 = math.add(Math.pow(pvec2[0], 2), Math.pow(pvec2[1], 2));
+        var E2 = Math.pow(math.add(psq2, Math.pow(Vis.m, 2)), 0.5);
+        var Ep2 = 0.5*Math.pow(E2, -1);
+
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+
+                var xvec = [Vis.a*i, Vis.a*j];      // current position on the grid for calculation
+
+                //Particle 1 represented by Gaussian
+                var deltaxvec1 =  math.subtract(xvec, x0vec1);
+                var deltaxvec1sq = Math.pow(deltaxvec1[0], 2) + Math.pow(deltaxvec1[1], 2);
+                var r1 = math.exp(- Math.pow(Vis.sigma, 2)*deltaxvec1sq/2 );
+                var theta1 = math.dot(pvec1, deltaxvec1);
+                var phi1 = math.Complex.fromPolar(r1, theta1);
+
+                var horrible1Re = 2*math.dot(pvec1, deltaxvec1)*Ep1*(psq1 - 2*Math.pow(Vis.sigma, 2)*deltaxvec1sq);
+                var horrible1Im = -(E1-2*psq1*Ep1);
+                var horrible1 = math.complex(horrible1Re, horrible1Im);
+                var phi1OneDot = math.multiply(phi1, horrible1);
+
+                //Particle 2 represented by another Gaussian
+                var deltaxvec2 =  math.subtract(xvec, x0vec2);
+                var deltaxvec2sq = Math.pow(deltaxvec2[0], 2) + Math.pow(deltaxvec2[1], 2);
+                var r2 = math.exp(- Math.pow(Vis.sigma, 2)*deltaxvec2sq/2 );
+                var theta2 = math.dot(pvec2, deltaxvec2);
+                var phi2 = math.Complex.fromPolar(r2, theta2);
+
+                var horrible2Re = 2*math.dot(pvec2, deltaxvec2)*Ep2*(psq2 - 2*Math.pow(Vis.sigma, 2)*deltaxvec2sq);
+                var horrible2Im = -(E2-2*psq2*Ep2);
+                var horrible2 = math.complex(horrible2Re, horrible2Im);
+                var phi2OneDot = math.multiply(phi2, horrible2);
+
+                Vis.phiCurrentTime[i][j] = math.add(phi1, phi2);
+                Vis.phiCurrentTimeCubed[i][j] = math.Complex.fromPolar(Math.pow(r1+r2, 3), 3*(theta1+theta2));
+                Vis.phiOneDot[i][j] = math.add(phi1OneDot, phi2OneDot);
+            }
+        }
+
+        //Using Finite Difference Method to compute the laplacian of phi (nabla2Phi)
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+                //The if statements sets the phi outside the grid to zero
+                if (i==0 || j==0 || i==Vis.Nx-1 || j==Vis.Ny-1){
+                    if (i==0){
+                        if (j==0){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else if (j==Vis.Ny-1){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i][j-1], Vis.phiCurrentTime[i+1][j]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else {
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i][j-1], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        }
+                    } else if (i==Vis.Nx-1) {
+                        if (j==0){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else if (j==Vis.Ny-1){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else {
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        }
+                    } else if (j==0) {
+                        if (i==0){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else if (i==Vis.Nx-1){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else {
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        }
+                    } else if (j==Vis.Ny-1){
+                        if (i==0){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else if (i==Vis.Nx-1){
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        } else {
+                            Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                        }
+                    }
+                } else {
+                    Vis.nabla2Phi[i][j] = math.multiply(math.add(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                }
+            }
+        }
+
+        //Compute second time derivative of phi (phiTwoDots)
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+                Vis.phiTwoDots[i][j] = math.add(Vis.nabla2Phi[i][j], math.add(math.multiply(-math.pow(Vis.m, 2), Vis.phiCurrentTime[i][j]), math.multiply(-Vis.lambda, Vis.phiCurrentTimeCubed[i][j])));
+            }
+        }
+
+        //Update phi: phiNewTime is for display
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+                Vis.phiNewTime[i][j] = math.add(math.add(Vis.phiCurrentTime[i][j], math.multiply(Vis.timeStep, Vis.phiOneDot[i][j])), math.multiply(math.pow(Vis.timeStep, 2), Vis.phiTwoDots[i][j]));
+            }
+        }
+
+        //Update display
+        for (let i=0; i < Vis.Nx; i++) {
+            for (let j=0; j < Vis.Ny; j++) {
+                var n = Vis.Ny * i + j;
+                var phiSq = Math.pow(Vis.phiNewTime[i][j].re, 2) + Math.pow(Vis.phiNewTime[i][j].im, 2);
+                Vis.pointR[n] = 0.2*phiSq + 0.05;
+            }
+        }
+
     },
 
     initGraph: function() {
