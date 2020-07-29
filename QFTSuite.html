@@ -181,59 +181,31 @@
                 <!--  an example section with content and 2 tabs-->
                 <div class="text section-body odd" id="p3">
                     <p>
+                        The equation of motion for the field is
                         $$ \ddot{\phi} = \nabla^2 \phi - m^2 \phi - \lambda \phi^3 $$
                     </p>   
                     <p>
-                        We start with the one dimensional case: 
-                        imagine having a chain of identical atoms.
-                        We then approximate their interactions to only be with nearest neighbours.
-                        We do this by saying that neighbouring atoms are connected by springs, all of which are identical.
+                        The dispersion relation is 
+                        $$ E(p^2) = \sqrt{\mathbf{p} \cdot \mathbf{p} + m^2} $$
+                        Its first derivative is given by
+                        $$ E'(p^2) = \frac{1}{2 \sqrt{\mathbf{p} \cdot \mathbf{p} + m^2}} $$
                     </p>
                     <p>
-                        The solution to this model is most easily dealt with when the infinite lattice approximation is made.
-                        This is where we approximate the solid size as much larger than the maximum displacement of individual atoms.
-                        This is physically acceptable as in reality, atom movements in solids are much smaller than the size of the solids.
-                    
-                        The most general solution is
-                        $$ u_n(t) = Re \sum_{k}\tilde{u}_k e^{i(nka-\omega_kt)} .$$
-                    
-                        This is a sum of an arbitrary number of waves, each with their own wavevector.                
-                        $u_n$ is the displacement of the $n^{th}$ atom from its equilibrium position
-                        and
-                        $k$ is the wavevector of the incoming wave.
+                        The boundary condtion of $\phi = 0$ outside of the grid.
+                        The initial conditions are 
+                        $$ \phi_i (0, \mathbf{x}) = e^{i \mathbf{\bar{p}}_i \cdot (\mathbf{x} - \mathbf{\bar{x}}_i)} e^{- \frac{\sigma^2}{2} (\mathbf{x} - \mathbf{\bar{x}}_i)^2} $$
+                        $$ \dot{\phi}_i (0, \mathbf{x}) = $$
+                        $$ \phi_i (0, \mathbf{x}) \{2 \mathbf{\bar{p}}_i \cdot (\mathbf{x} - \mathbf{\bar{x}}_i) E'_i(p^2_i)[p^2_i - 2 \sigma(\mathbf{x} - \mathbf{\bar{x}}_i)^2] $$
+                        $$ -i [E_i(p^2_i) - 2 p^2_i E'_i(p^2_i)] \} $$
+                        where the subscript $i$ denotes the $i^{th}$ particle. 
                     </p>
                     <p>
-                        Here we simulate for a single $k$:
-                        $$ u_n(t) = u_k \cos(nka-\omega_kt)$$
-                    
-                        For any given $k$:
-                        $$ \omega_k = 2 \omega_D \left| \sin \left( \frac{k a}{2} \right) \right|$$
-                        where
-                        $$ \omega_D = \sqrt{\frac{\kappa}{m}}$$
-                        $\kappa$ is the spring constant,
-                        $m$ is the mass of a single atom,
-                        $a$ is the atomic spacing
-                        and
-                        $\omega_D$ is also known as the Debye frequency.
-                        Here, we assume $a = \omega_D = 1$ and $\tilde{u}_k$ has zero phase for simplicity.
-                    </p>  
-                    <p>
-                        $u_k$ is the amplitude of the response of the individual atoms to wave mode $k$.
-                        Notice that the overall motion is unaffected if $2n \pi$ for any integer $n$ is added to $k$.
-                        Mathematically, this is due to the factor $e^{i2n\pi} = 1$ in the general solution.
-                        Physically, it makes sense due to the given trigonometric dispersion relation for $\omega_k$ - 
-                        $k + 2n\pi$ has the same energy as $k$. 
-                        (Try adding integer multiple of 2 to the $r$ value!)
+                        The field satisfies linearity
+                        $$ \phi = \Sigma_i \phi_i $$
+                        $$ \dot{\phi} = \Sigma_i \dot{\phi_i} $$
                     </p>
                     <p>
-                        For the upcoming visualisations, we will ignore this redundancy by taking 
-                        $-\pi \lt ka \leqslant \pi $, known as the first Brillouin Zone. 
-                        This applies to components in the higher dimensions too.
-                    </p>
-                    <p>                            
-                        Also notice that when $r \to \pm 1$, there are two standing waves. 
-                        Neighbouring atoms move in anti-phase.
-                        (Reduce $u_k$ to see this effect better.)
+                        We deploy Finite Difference method to compute the laplacian $\nabla^2 \phi$.
                     </p>
                 </div>
             </div>

@@ -162,8 +162,8 @@ Vis.setup = {
     initConsts: function() {
         Vis.a = 0.25; // point spacing
 
-        Vis.Nx = 80; // # of points in x direction
-        Vis.Ny = 80; // # of points in y direction
+        Vis.Nx = Math.round(20/Vis.a); // # of points in x direction
+        Vis.Ny = Math.round(20/Vis.a); // # of points in y direction
         Vis.N = Vis.Nx * Vis.Ny;
 
         Vis.canvasx = 450;
@@ -180,7 +180,7 @@ Vis.setup = {
             }
         } 
 
-        Vis.timeStep = 1/50;
+        Vis.timeStep = 1/100;
         Vis.timeDisplay = document.getElementById('time-display');
 
     },
@@ -188,20 +188,20 @@ Vis.setup = {
     initVars: function() {
         Vis._then = Date.now();
 
-        Vis.xbar1 = 0;
-        Vis.ybar1 = 0;
+        Vis.xbar1 = 10;
+        Vis.ybar1 = 10;
         Vis.pxbar1 = 1;
         Vis.pybar1 = 0;
 
-        Vis.xbar2 = 20;
-        Vis.ybar2 = 20;
-        Vis.pxbar2 = -1;
+        Vis.xbar2 = 1000000;
+        Vis.ybar2 = 0;
+        Vis.pxbar2 = 0;
         Vis.pybar2 = 0;
 
-        Vis.sigma = 0.3;
+        Vis.sigma = 0.5;
         Vis.m = 0.75;
 
-        Vis.lambda = 0.1;
+        Vis.lambda = 0.01;
 
         Vis.phiOldTime = [];
         Vis.phiCurrentTime = [];
@@ -374,7 +374,8 @@ Vis.setup = {
         //});
 
         Vis.buttonRestart.addEventListener('click', function() {
-            Vis._then = Date.now();
+            Vis.setup.initCondition();  //Reset the initial condition
+            Vis._then = Date.now();     //Reset the time to t = 0
         });
     },
 
