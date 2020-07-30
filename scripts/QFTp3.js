@@ -86,45 +86,30 @@ Vis.workers = {
         for (let i=0; i < Vis.Nx; i++) {
             for (let j=0; j < Vis.Ny; j++) {
                 //Step 1: Compute laplacian of phi (nabla2Phi) using Finite Difference Method
-                //The if statements sets the phi outside the grid to zero
-                var temporaryNabla2Phi;
-                if (i==0 || j==0 || i==Vis.Nx-1 || j==Vis.Ny-1){
-                    if (i==0){
-                        if (j==0){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else if (j==Vis.Ny-1){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i][j-1], Vis.phiCurrentTime[i+1][j]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else {
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i][j-1], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        }
-                    } else if (i==Vis.Nx-1) {
-                        if (j==0){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else if (j==Vis.Ny-1){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else {
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        }
-                    } else if (j==0) {
-                        if (i==0){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else if (i==Vis.Nx-1){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else {
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        }
-                    } else if (j==Vis.Ny-1){
-                        if (i==0){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else if (i==Vis.Nx-1){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else {
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        }
-                    }
+                //Periodic boundary condition
+                var il, ir;     //left hand side of ith term and right hand side of ith term
+                var jl, jr;     //left hand side of jth term and right hand side of jth term
+                if (i==0) {
+                    il=Vis.Nx-1;
+                    ir=i+1;
+                } else if (i==Vis.Nx-1) {
+                    il=i-1;
+                    ir=0;
                 } else {
-                    temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                    il=i-1;
+                    ir=i+1;
                 }
+                if (j==0) {
+                    jl=Vis.Ny-1;
+                    jr=j+1;
+                } else if (j==Vis.Ny-1) {
+                    jl=j-1;
+                    jr=0;
+                } else {
+                    jl=j-1;
+                    jr=j+1;
+                }
+                var temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(math.add(Vis.phiCurrentTime[il][j], Vis.phiCurrentTime[i][jl]), Vis.phiCurrentTime[ir][j]), Vis.phiCurrentTime[i][jr]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
                 Vis.nabla2Phi[i][j] = temporaryNabla2Phi;
                 //Step 2: Compute second time derivative of phi (phiTwoDots)
                 //This is the equation of motion of the field
@@ -140,7 +125,6 @@ Vis.workers = {
                 var n = Vis.Ny * i + j;
                 var phiSq = Math.pow(temporaryPhiNewTime.re, 2) + Math.pow(temporaryPhiNewTime.im, 2);
                 Vis.pointR[n] = 0.2*phiSq + 0.05;
-
             }
         }
 
@@ -149,7 +133,7 @@ Vis.workers = {
 
 Vis.setup = {
     initConsts: function() {
-        Vis.a = 0.20; // point spacing
+        Vis.a = 0.25; // point spacing
 
         Vis.Nx = Math.round(20/Vis.a); // # of points in x direction
         Vis.Ny = Math.round(20/Vis.a); // # of points in y direction
@@ -179,7 +163,7 @@ Vis.setup = {
 
         Vis.xbar1 = 10;
         Vis.ybar1 = 10;
-        Vis.pxbar1 = 2;
+        Vis.pxbar1 = 1;
         Vis.pybar1 = 0;
 
         Vis.xbar2 = 1000000;
@@ -187,8 +171,8 @@ Vis.setup = {
         Vis.pxbar2 = 0;
         Vis.pybar2 = 0;
 
-        Vis.sigma = 1;
-        Vis.m = 0.1;
+        Vis.sigma = 3;
+        Vis.m = 10;
 
         Vis.lambda = 0;
 
@@ -278,45 +262,31 @@ Vis.setup = {
         //This is done in a separate for loop because we need a complete grid of phi to use Finite Difference
         for (let i=0; i < Vis.Nx; i++) {
             for (let j=0; j < Vis.Ny; j++) {
-                //The if statements sets the phi outside the grid to zero
-                var temporaryNabla2Phi;
-                if (i==0 || j==0 || i==Vis.Nx-1 || j==Vis.Ny-1){
-                    if (i==0){
-                        if (j==0){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else if (j==Vis.Ny-1){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i][j-1], Vis.phiCurrentTime[i+1][j]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else {
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i][j-1], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        }
-                    } else if (i==Vis.Nx-1) {
-                        if (j==0){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else if (j==Vis.Ny-1){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else {
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        }
-                    } else if (j==0) {
-                        if (i==0){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else if (i==Vis.Nx-1){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else {
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        }
-                    } else if (j==Vis.Ny-1){
-                        if (i==0){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i+1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else if (i==Vis.Nx-1){
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        } else {
-                            temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j-1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
-                        }
-                    }
+                //Step 1: Compute laplacian of phi (nabla2Phi) using Finite Difference Method
+                //Periodic boundary condition
+                var il, ir;     //left hand side of ith term and right hand side of ith term
+                var jl, jr;     //left hand side of jth term and right hand side of jth term
+                if (i==0) {
+                    il=Vis.Nx-1;
+                    ir=i+1;
+                } else if (i==Vis.Nx-1) {
+                    il=i-1;
+                    ir=0;
                 } else {
-                    temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(math.add(Vis.phiCurrentTime[i-1][j], Vis.phiCurrentTime[i][j-1]), Vis.phiCurrentTime[i+1][j]), Vis.phiCurrentTime[i][j+1]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
+                    il=i-1;
+                    ir=i+1;
                 }
+                if (j==0) {
+                    jl=Vis.Ny-1;
+                    jr=j+1;
+                } else if (j==Vis.Ny-1) {
+                    jl=j-1;
+                    jr=0;
+                } else {
+                    jl=j-1;
+                    jr=j+1;
+                }
+                var temporaryNabla2Phi = math.multiply(math.add(math.add(math.add(math.add(Vis.phiCurrentTime[il][j], Vis.phiCurrentTime[i][jl]), Vis.phiCurrentTime[ir][j]), Vis.phiCurrentTime[i][jr]), math.multiply(-4, Vis.phiCurrentTime[i][j])), Math.pow(Vis.a, -2));
                 Vis.nabla2Phi[i][j] = temporaryNabla2Phi;
                 //Step 4: Compute second time derivative of phi (phiTwoDots)
                 var temporaryPhiCurrentTime = Vis.phiCurrentTime[i][j];
